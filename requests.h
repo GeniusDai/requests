@@ -11,8 +11,8 @@
  */
 
 
-#ifndef _requests_h
-#define _requests_h
+#ifndef requests_h
+#define requests_h
 
 #include <netinet/in.h>
 #include <stdlib.h>
@@ -24,6 +24,7 @@
 #include <netdb.h>
 #include <sys/types.h>
 #include <errno.h>
+#include "hashtable.h"
 
 #define FAMILY AF_INET
 #define PORT 80

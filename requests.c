@@ -15,7 +15,11 @@ void set_servaddr(const char *const hostname, struct sockaddr_in *servaddr_ptr) 
     
     struct hostent *host_ptr;
     host_ptr = gethostbyname(hostname);
-    void *src = *(host_ptr->h_addr_list);
+    if (host_ptr == NULL) {
+        printf("DNS error\n");
+        exit(-1);
+    }
+    void *src = *host_ptr->h_addr_list;
     void *dest = &servaddr_ptr->sin_addr;
     if (src == NULL) {
         exit(-1);
@@ -72,6 +76,7 @@ void parse_url(const char *const url, struct url *url_ptr) {
 
 void set_http_request(const char *const url, struct request *request_ptr, char *request_buff) {
     int count = 0; /* record the count of the request_buff */
+    char *line_sep = "\r\n";
     
     struct url s_url;
     parse_url(url, &s_url);
@@ -116,7 +121,7 @@ void set_http_request(const char *const url, struct request *request_ptr, char *
     count += len;
     
     /* end of the first line */
-    bcopy("\r\n", request_buff + count, 2);
+    bcopy(line_sep, request_buff + count, 2);
     count += 2;
     for (pptr = request_ptr->headers; request_ptr->headers && *pptr != NULL; pptr++) {
         src = *pptr;
@@ -125,11 +130,11 @@ void set_http_request(const char *const url, struct request *request_ptr, char *
         bcopy(src, dest, len);
         count += len;
         /* headers separated by "/r/n" */
-        bcopy("\r\n", request_buff + count, 2);
+        bcopy(line_sep, request_buff + count, 2);
         count += 2;
     }
     /* end of headers */
-    bcopy("\r\n", request_buff + count, 2);
+    bcopy(line_sep, request_buff + count, 2);
     count += 2;
     
     /* parse data to the request body */
@@ -139,7 +144,7 @@ void set_http_request(const char *const url, struct request *request_ptr, char *
         len = strlen(src);
         bcopy(src, dest, len);
         count += len;
-        bcopy("\r\n", request_buff + count, 2);
+        bcopy(line_sep, request_buff + count, 2);
         count += 2;
     }
     return;
@@ -173,7 +178,7 @@ void requests(const char *const url, struct request *request_ptr, char *response
         perror("write error");
         exit(-1);
     }
-    char read_buff[60000];
+    
     int n, count = 0;
     while ((n = read(sockfd, response_buff + count, sizeof(response_buff)))) {
         count += n;
@@ -189,13 +194,23 @@ int main() {
     struct request s_request;
     bzero(&s_request, sizeof(struct request));
     s_request.method = "GET";
-    char *headers[2];
-    headers[0] = "Connection: close";
-    headers[1] = NULL;
+    char *headers[3];
+    headers[0] = "Host: www.baidu.com";
+    headers[1] = "Connection: close";
+    headers[2] = NULL;
     s_request.headers = headers;
-    char response_buff[60000];
-    requests("https://www.baidu.com/", &s_request, response_buff);
+    char response_buff[600000];
+    requests("http://www.baidu.com/", &s_request, response_buff);
     printf("response_buff is:\n%s\n", response_buff);
+    struct node **table = init_table();
+    set(table, "key1", "value1");
+    set(table, "k2", "v2");
+    set(table, "k3", "v3");
+    print_table(table);
+    set(table, "k3", "v3.1");
+    pop(table, "k2");
+    print_table(table);
+    free(table);
     return 0;
 }
 
