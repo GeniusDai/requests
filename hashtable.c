@@ -38,7 +38,7 @@ void print_table (struct node **a) {
     for (i = 0; i < TABLE_SIZE; i++) {
         head = a[i];
         while (head != NULL) {
-            printf("KEY ---> %s, VALUE ---> %s\n", head->key, head->value);
+            printf("%s: %s\n", head->key, head->value);
             head = head->next;
         }
     }

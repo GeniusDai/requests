@@ -48,7 +48,7 @@ struct url {
 struct response {
     int status_code;
     char *reason;
-    char **headers;
+    struct node **headers;
     char *content;
 };
 

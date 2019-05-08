@@ -187,7 +187,64 @@ void requests(const char *const url, struct request *request_ptr, char *response
 }
 
 void parse_response(char *response_buff, struct response *response_ptr) {
+    int len = strlen(response_buff);
+    int i;
+    for (i = 0; i < len; i++) {
+        if (strncmp(response_buff + i, "\r\n\r\n", 4) == 0) {
+            break;
+        }
+    }
     
+    response_ptr->content = response_buff + i + 4;
+    
+    char response_header[i + 2];
+    bcopy(response_buff, response_header, i + 2);
+    
+    int count = 0;
+    for (i = 0; i < sizeof(response_header); i++) {
+        if (strncmp(response_header + i, "\r\n", 2) == 0) {
+            count++;
+        }
+    }
+    char *line;
+    char *key;
+    char *value;
+    char *elem;
+    struct node **table = init_table();
+    char *headers[count];
+    line = strtok(response_header, "\r\n");
+    for (i = 0; i < count; i++) {
+        headers[i] = line;
+        line = strtok(NULL, "\r\n");
+    }
+    
+    /** parse first line */
+    strtok(headers[0], " ");
+    response_ptr->status_code = atoi(strtok(NULL, " "));
+    elem = strtok(NULL, " ");
+    response_ptr->reason = malloc(sizeof(char) * (strlen(elem) + 1));
+    bcopy(elem, response_ptr->reason, strlen(elem));
+    /** NULL terminates */
+    bcopy("\0", response_ptr->reason + 2, 1);
+    
+    /** parse headers */
+    for (i = 1; i < count; i++) {
+        int j, len;
+        len = strlen(headers[i]);
+        for (j = 0; j < len; j++) {
+            if (strncmp(headers[i] + j, ": ", 2) == 0)
+                break;
+        }
+        key = malloc(sizeof(char) * (j + 1));
+        value = malloc(sizeof(char) * (len - j - 2 + 1));
+        bcopy(headers[i], key, j);
+        bcopy("\0", key + j, 1);
+        bcopy(headers[i] + j + 2, value, len - j - 2);
+        bcopy("\0", value + len - j - 2, 1);
+        set(table, key, value);
+    }
+    response_ptr->headers = table;
+    return;
 }
 
 int main() {
@@ -202,18 +259,8 @@ int main() {
     char response_buff[600000];
     requests("http://www.baidu.com/", &s_request, response_buff);
     printf("response_buff is:\n%s\n", response_buff);
-    struct node **table = init_table();
-    set(table, "key1", "value1");
-    set(table, "k2", "v2");
-    set(table, "k3", "v3");
-    print_table(table);
-    set(table, "k3", "v3.1");
-    pop(table, "k2");
-    print_table(table);
-    free(table);
+    struct response s_response;
+    parse_response(response_buff, &s_response);
+    print_table(s_response.headers);
     return 0;
 }
-
-
-
-
