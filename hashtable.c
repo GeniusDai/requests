@@ -6,9 +6,8 @@
 //  Copyright © 2019 hao. All rights reserved.
 //
 
-#ifndef hashtable_h
+
 #include "hashtable.h"
-#endif
 
 struct node **init_table(void) {
     struct node **a = malloc(TABLE_SIZE * sizeof(void *));
@@ -34,17 +33,15 @@ void free_table(struct node **a) {
 }
 
 void print_table (struct node **a) {
-    printf("HASH TABLE:\n");
     int i;
     struct node *head;
     for (i = 0; i < TABLE_SIZE; i++) {
         head = a[i];
         while (head != NULL) {
-            printf("%s: %s\n", head->key, head->value);
+            printf("KEY ---> %s, VALUE ---> %s\n", head->key, head->value);
             head = head->next;
         }
     }
-    printf("\n");
     return;
 }
 
@@ -57,7 +54,8 @@ void set(entry table, keytype key, valuetype value) {
     struct node *head = table[hash_code];
     struct node *pre = NULL;
     
-    while (head != NULL && head->key != key) {
+    /** the keys are compared due to the address value */
+    while (head != NULL && strncmp(head->key, key, MAX(strlen(head->key), strlen(key))) != 0) {
         pre = head;
         head = head->next;
     }
@@ -77,7 +75,7 @@ void set(entry table, keytype key, valuetype value) {
             }
             pre->next = head;
         }
-    } else if (head->key == key){
+    } else {
         head->value = value;
     }
     return;
@@ -88,7 +86,7 @@ struct node *pop(entry table, keytype key) {
     struct node *head = table[hash_code];
     struct node *pre = NULL;
     
-    while (head != NULL && head->key != key) {
+    while (head != NULL && strncmp(head->key, key, MAX(strlen(head->key), strlen(key))) != 0) {
         pre = head;
         head = head->next;
     }
@@ -107,7 +105,7 @@ struct node *get(entry table, keytype key) {
     int hash_code = hash_func(key);
     struct node *head = table[hash_code];
     
-    while (head != NULL && head->key != key) {
+    while (head != NULL && strncmp(head->key, key, MAX(strlen(head->key), strlen(key))) != 0) {
         head = head->next;
     }
     return head;

@@ -16,6 +16,8 @@
 
 #define TABLE_SIZE 29
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 typedef char *keytype;
 typedef char *valuetype;
 
