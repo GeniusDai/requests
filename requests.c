@@ -186,6 +186,10 @@ void requests(const char *const url, struct request *request_ptr, char *response
     return;
 }
 
+/**
+ * response_ptr->content: memory locates in the response_buff.
+ * the other fields in the struct locate in the heap, that is acheived by using malloc.
+ */
 void parse_response(char *response_buff, struct response *response_ptr) {
     int len = strlen(response_buff);
     int i;
