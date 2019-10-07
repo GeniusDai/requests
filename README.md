@@ -10,6 +10,4 @@ Protocol: TCP IPv4 HTTP/1.1
 
 Just include the head files and build c files to lib you want.
 
-The main function is in requests.c.
-
 Enjoy!

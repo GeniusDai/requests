@@ -8,7 +8,7 @@
 
 #include "requests.h"
 
-void set_servaddr(const char *const hostname, struct sockaddr_in *servaddr_ptr) {
+static void set_servaddr(const char *const hostname, struct sockaddr_in *servaddr_ptr) {
     bzero(servaddr_ptr, sizeof(struct sockaddr_in));
     servaddr_ptr->sin_family = FAMILY;
     servaddr_ptr->sin_port = htons(PORT);
@@ -29,7 +29,7 @@ void set_servaddr(const char *const hostname, struct sockaddr_in *servaddr_ptr) 
     return;
 }
 
-void parse_url(const char *const url, struct url *url_ptr) {
+static void parse_url(const char *const url, struct url *url_ptr) {
     int count = 0;
     int i;
     int host_l = 0, host_r = 0; /* start of host, and start of path */
@@ -74,7 +74,7 @@ void parse_url(const char *const url, struct url *url_ptr) {
     return;
 }
 
-void set_http_request(const char *const url, struct request *request_ptr, char *request_buff) {
+static void set_http_request(const char *const url, struct request *request_ptr, char *request_buff) {
     int count = 0; /* record the count of the request_buff */
     char *line_sep = "\r\n";
     
@@ -150,7 +150,7 @@ void set_http_request(const char *const url, struct request *request_ptr, char *
     return;
 }
 
-void requests(const char *const url, struct request *request_ptr, char *response_buff) {
+void requests(const char *const url, struct request *const request_ptr, char *const response_buff) {
     char request_buff[MAXLINE];
     struct sockaddr_in servaddr;
     set_http_request(url, request_ptr, request_buff);
@@ -249,28 +249,4 @@ void parse_response(char *response_buff, struct response *response_ptr) {
     }
     response_ptr->headers = table;
     return;
-}
-
-int main() {
-    struct request s_request;
-    bzero(&s_request, sizeof(struct request));
-    s_request.method = "GET";
-    char *headers[2];
-    headers[0] = "Connection: close";
-    headers[1] = NULL;
-    s_request.headers = headers;
-    char response_buff[600000];
-    requests("http://www.baidu.com/", &s_request, response_buff);
-    struct response s_response;
-    parse_response(response_buff, &s_response);
-    
-    printf("status_code: %d\n", s_response.status_code);
-    printf("\n");
-    printf("reason: %s\n", s_response.reason);
-    printf("\n");
-    printf("headers:\n");
-    print_table(s_response.headers);
-    printf("\n");
-    printf("content:\n%s", s_response.content);
-    return 0;
 }

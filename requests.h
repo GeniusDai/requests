@@ -52,4 +52,8 @@ struct response {
     char *content;
 };
 
+void requests(const char *const url, struct request *const request_ptr, char *const response_buff);
+
+void parse_response(char *response_buff, struct response *response_ptr);
+
 #endif /* requests_h */
